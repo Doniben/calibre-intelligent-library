@@ -50,12 +50,19 @@ Sistema de búsqueda semántica integrado en Calibre que:
     - ✓ Identifica EPUBs disponibles
     - ✓ Estadísticas: 67,311 libros con resúmenes
 
-- [ ] **1.3 Extracción de contenido EPUB**
-  - [ ] Implementar extractor de tabla de contenidos (TOC)
-  - [ ] Implementar extractor de texto completo por capítulo
-  - [ ] Crear sistema de chunks (fragmentos de texto)
-  - [ ] Manejo de errores para EPUBs corruptos
-  - **Tiempo estimado**: 4-6 horas
+- [x] **1.3 Extracción de contenido EPUB** ✅
+  - [x] Implementar extractor de tabla de contenidos (TOC)
+  - [x] Implementar extractor de texto completo por capítulo
+  - [x] Crear sistema de chunks (fragmentos de texto)
+  - [x] Manejo de errores para EPUBs corruptos
+  - **Tiempo real**: 1.5 horas
+  - **Tests**: ✅ 10/10 passed (test_epub_extractor.py)
+  - **Validación**:
+    - ✓ Extrae TOC correctamente (22 entradas en libro de prueba)
+    - ✓ Extrae texto de capítulos (141,700 palabras en libro de prueba)
+    - ✓ Chunking funcional (847 chunks con overlap)
+    - ✓ Probado en 5 EPUBs diferentes (100% éxito)
+    - ✓ Manejo robusto de errores
 
 - [ ] **1.4 Generación de embeddings**
   - [ ] Configurar modelo Sentence Transformers
