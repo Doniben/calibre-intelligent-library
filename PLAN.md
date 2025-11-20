@@ -110,15 +110,41 @@ Sistema de búsqueda semántica integrado en Calibre que:
     - ✓ Índices en foreign keys y embedding_id
     - ✓ Statistics tracking
 
-- [ ] **1.7 API REST con FastAPI**
-  - [ ] Endpoint: POST /search (búsqueda semántica)
-  - [ ] Endpoint: GET /book/{id} (detalles de libro)
-  - [ ] Endpoint: GET /book/{id}/toc (tabla de contenidos)
-  - [ ] Endpoint: GET /chapter/{id} (contenido de capítulo)
-  - [ ] Endpoint: GET /health (health check)
-  - **Tiempo estimado**: 3-4 horas
+- [x] **1.7 API REST con FastAPI** ✅
+  - [x] Endpoint: POST /search (búsqueda semántica)
+  - [x] Endpoint: GET /book/{id} (detalles de libro)
+  - [x] Endpoint: GET /book/{id}/toc (tabla de contenidos)
+  - [x] Endpoint: GET /chapter/{id} (contenido de capítulo)
+  - [x] Endpoint: GET /health (health check)
+  - **Tiempo real**: 2 horas
+  - **Tests**: ✅ 7/7 passed (test_api.py)
+  - **Validación**:
+    - ✓ FastAPI server running on port 8765
+    - ✓ All endpoints responding correctly
+    - ✓ Health check shows system status
+    - ✓ Stats endpoint shows Calibre + indexed data
+    - ✓ Get book returns full metadata
+    - ✓ 404 handling for nonexistent books
+    - ✓ API documentation at /docs
+    - ✓ CORS middleware configured
 
-**Total Fase 1**: ~20-25 horas de desarrollo + 12-14 horas de indexación
+**Total Fase 1**: ~10 horas de desarrollo + 12-14 horas de indexación pendiente
+
+---
+
+## ✅ FASE 1 COMPLETADA
+
+**Logros:**
+- ✅ Backend completo y funcional
+- ✅ Conexión a Calibre DB (80,379 libros)
+- ✅ Extracción de EPUBs (TOC + texto completo)
+- ✅ Generación de embeddings (modelo all-MiniLM-L6-v2)
+- ✅ Índice vectorial FAISS
+- ✅ Base de datos de chunks (SQLite)
+- ✅ API REST completa (FastAPI)
+- ✅ 58 tests pasando en total
+
+**Próximo paso:** Fase 2 - Integración con Kiro CLI
 
 ---
 
