@@ -350,12 +350,124 @@ Sistema de búsqueda semántica integrado en Calibre que:
 
 ---
 
+## 🧪 Estrategia de Testing
+
+### Testing Automatizado (Kiro CLI ejecuta)
+
+**95% del testing se hace desde terminal, sin abrir Calibre**
+
+#### Nivel 1: Unit Tests
+```bash
+# Tests individuales de componentes
+pytest tests/test_calibre_db.py          # Conexión a metadata.db
+pytest tests/test_epub_extractor.py      # Extracción de EPUBs
+pytest tests/test_embeddings.py          # Generación de vectores
+pytest tests/test_search.py              # Búsqueda vectorial
+pytest tests/test_kiro_client.py         # Cliente Kiro
+```
+
+#### Nivel 2: Integration Tests
+```bash
+# Tests de flujo completo
+pytest tests/test_search_pipeline.py     # Búsqueda end-to-end
+pytest tests/test_kiro_integration.py    # Conversación completa
+pytest tests/test_api.py                 # Todos los endpoints
+```
+
+#### Nivel 3: API Tests (con curl)
+```bash
+# Pruebas de API REST
+bash tests/test_api.sh                   # Script con todos los endpoints
+```
+
+#### Nivel 4: Script de Validación Completa
+```bash
+# Ejecuta todos los tests
+./run_tests.sh
+
+# Output esperado:
+# ✓ Calibre DB connection
+# ✓ EPUB extraction (10 sample books)
+# ✓ Embeddings generation
+# ✓ Vector search accuracy
+# ✓ Kiro CLI integration
+# ✓ API endpoints (all 200 OK)
+# ⚠ Plugin UI (requires manual testing in Calibre)
+```
+
+### Testing Manual (Usuario ejecuta en Calibre)
+
+**Solo al final de Fase 3, requiere ~15 minutos**
+
+#### Checklist de Pruebas en Calibre:
+
+- [ ] **Instalación del plugin**
+  - Preferencias → Plugins → Cargar plugin
+  - Verificar que aparece en lista
+  - Reiniciar Calibre
+
+- [ ] **UI Elements**
+  - [ ] Botón "Búsqueda Inteligente" visible en toolbar
+  - [ ] Click abre diálogo correctamente
+  - [ ] Panel de chat visible
+
+- [ ] **Búsqueda Básica**
+  - [ ] Escribir query: "libros sobre historia"
+  - [ ] Resultados aparecen en <1 segundo
+  - [ ] Tabla muestra: título, autor, similitud
+  - [ ] Click en libro muestra detalles
+
+- [ ] **Búsqueda Avanzada**
+  - [ ] Query conceptual: "desigualdad económica"
+  - [ ] Resultados relevantes (no solo keyword match)
+  - [ ] Capítulos relevantes mostrados
+
+- [ ] **Chat con Kiro**
+  - [ ] Seleccionar 2-3 libros
+  - [ ] Preguntar: "¿Cuál es más académico?"
+  - [ ] Kiro responde en <5 segundos
+  - [ ] Follow-up: "¿Por qué?" mantiene contexto
+
+- [ ] **Navegación**
+  - [ ] Ver tabla de contenidos de un libro
+  - [ ] Abrir capítulo específico
+  - [ ] Texto se muestra correctamente
+
+- [ ] **Configuración**
+  - [ ] Abrir configuración del plugin
+  - [ ] Cambiar puerto (ej: 8766)
+  - [ ] Guardar y verificar que funciona
+
+### División de Responsabilidades
+
+| Fase | Kiro CLI Testing | Usuario Testing |
+|------|------------------|-----------------|
+| 1. Backend | ✅ 100% automatizado | ❌ No requiere |
+| 2. Kiro Integration | ✅ 100% automatizado | ❌ No requiere |
+| 3. Plugin | ✅ 90% simulado | ✅ 10% UI en Calibre |
+| 4. Instalación | ✅ Scripts automáticos | ✅ Validar instalador |
+| 5. Testing | ✅ Ejecutar suite completa | ✅ Checklist manual |
+
+### Cuándo Necesitas Abrir Calibre
+
+**Durante desarrollo**: Nunca (todo se prueba con comandos)
+
+**Al finalizar Fase 3**: Una vez (15 minutos)
+- Instalar plugin
+- Verificar UI
+- Probar flujo completo
+
+**Al finalizar proyecto**: Una vez más (30 minutos)
+- Testing completo con checklist
+- Validar todas las funcionalidades
+
 ## 🔄 Actualizaciones
 
 **2025-11-19**: Plan inicial creado
 - Definida arquitectura híbrida (plugin + backend)
 - Estimados de tiempo por fase
 - Cronograma de 10 semanas
+- Agregada estrategia de testing automatizado vs manual
 
 ---
 
