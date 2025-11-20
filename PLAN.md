@@ -29,18 +29,26 @@ Sistema de búsqueda semántica integrado en Calibre que:
 **Objetivo**: Crear el motor de búsqueda semántica
 
 #### Tareas:
-- [ ] **1.1 Setup del proyecto backend**
-  - [ ] Crear estructura de carpetas
-  - [ ] Configurar entorno virtual Python
-  - [ ] Instalar dependencias (FastAPI, sentence-transformers, FAISS, etc.)
-  - [ ] Crear requirements.txt
-  - **Tiempo estimado**: 1 hora
+- [x] **1.1 Setup del proyecto backend** ✅
+  - [x] Crear estructura de carpetas
+  - [x] Configurar entorno virtual Python
+  - [x] Instalar dependencias (FastAPI, sentence-transformers, FAISS, etc.)
+  - [x] Crear requirements.txt
+  - **Tiempo real**: 30 minutos
+  - **Tests**: N/A
 
-- [ ] **1.2 Conexión con Calibre DB**
-  - [ ] Crear módulo para leer metadata.db
-  - [ ] Extraer libros, autores, tags, resúmenes
-  - [ ] Crear modelo de datos interno
-  - **Tiempo estimado**: 2-3 horas
+- [x] **1.2 Conexión con Calibre DB** ✅
+  - [x] Crear módulo para leer metadata.db
+  - [x] Extraer libros, autores, tags, resúmenes
+  - [x] Crear modelo de datos interno
+  - **Tiempo real**: 1 hora
+  - **Tests**: ✅ 10/10 passed (test_calibre_db.py)
+  - **Validación**: 
+    - ✓ Conecta a metadata.db correctamente
+    - ✓ Lee 80,379 libros
+    - ✓ Extrae metadata completa (título, autor, resumen, tags)
+    - ✓ Identifica EPUBs disponibles
+    - ✓ Estadísticas: 67,311 libros con resúmenes
 
 - [ ] **1.3 Extracción de contenido EPUB**
   - [ ] Implementar extractor de tabla de contenidos (TOC)
