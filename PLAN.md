@@ -149,6 +149,35 @@ Sistema de búsqueda semántica integrado en Calibre que:
 ---
 
 ### Fase 2: Integración con Kiro CLI ⏳
+
+**Objetivo**: Sistema conversacional para analizar resultados de búsqueda
+
+#### Tareas:
+- [x] **2.1 Cliente Kiro** ✅
+  - [x] Implementar KiroClient con subprocess
+  - [x] Manejo de sesiones persistentes (KiroSession)
+  - [x] Sistema de gestión de sesiones (KiroSessionManager)
+  - [x] Formateo de contexto para Kiro
+  - **Tiempo real**: 1 hora
+  - **Tests**: ✅ 10/10 passed (4 skipped - requieren Kiro activo)
+  - **Validación**:
+    - ✓ KiroClient comunica con kiro-cli via subprocess
+    - ✓ KiroSession mantiene contexto y historial
+    - ✓ KiroSessionManager gestiona múltiples sesiones
+    - ✓ format_books_context formatea resultados para Kiro
+    - ✓ Timeout y error handling implementados
+    - ✓ Cleanup de sesiones inactivas
+
+- [ ] **2.2 API de conversación**
+  - [ ] Endpoint: POST /session/new (crear sesión)
+  - [ ] Endpoint: POST /ask/{session_id} (preguntar)
+  - [ ] Endpoint: DELETE /session/{session_id} (cerrar sesión)
+  - [ ] Sistema de contexto (pasar resultados de búsqueda a Kiro)
+  - **Tiempo estimado**: 3-4 horas
+
+---
+
+### Fase 2: Integración con Kiro CLI ⏳
 **Objetivo**: Sistema conversacional para análisis de resultados
 
 #### Tareas:
