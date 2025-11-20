@@ -6,10 +6,14 @@ pydantic==2.5.0
 # Database
 aiosqlite==0.19.0
 
-# Embeddings and Vector Search
+# Embeddings and Vector Search - TESTED COMPATIBLE VERSIONS
 sentence-transformers==2.2.2
 faiss-cpu==1.7.4
-torch==2.1.0
+torch==2.1.2
+torchvision==0.16.2
+numpy==1.24.3
+transformers==4.35.2
+huggingface_hub==0.16.4
 
 # EPUB processing
 ebooklib==0.18

@@ -64,12 +64,20 @@ Sistema de búsqueda semántica integrado en Calibre que:
     - ✓ Probado en 5 EPUBs diferentes (100% éxito)
     - ✓ Manejo robusto de errores
 
-- [ ] **1.4 Generación de embeddings**
-  - [ ] Configurar modelo Sentence Transformers
-  - [ ] Crear pipeline de procesamiento
-  - [ ] Implementar sistema de progreso y reanudación
-  - [ ] Generar embeddings para resúmenes + TOCs + chunks
-  - **Tiempo estimado**: 2-3 horas de código + 12-14 horas de procesamiento
+- [x] **1.4 Generación de embeddings** ✅
+  - [x] Configurar modelo Sentence Transformers
+  - [x] Crear pipeline de procesamiento
+  - [x] Implementar sistema de progreso y reanudación
+  - [x] Generar embeddings para resúmenes + TOCs + chunks
+  - **Tiempo real**: 2 horas (incluyendo resolución de dependencias)
+  - **Tests**: ✅ 12/12 passed (test_embeddings.py)
+  - **Validación**:
+    - ✓ Modelo all-MiniLM-L6-v2 cargado (384 dimensiones)
+    - ✓ Encoding batch funcional
+    - ✓ Similitud semántica: 0.844 (textos similares) vs 0.360 (diferentes)
+    - ✓ Pipeline con estado persistente (reanudable)
+    - ✓ Búsqueda semántica validada
+  - **Nota**: Procesamiento completo de biblioteca (12-14 horas) se hará en tarea 1.7
 
 - [ ] **1.5 Índice vectorial FAISS**
   - [ ] Crear índice FAISS
