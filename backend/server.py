@@ -16,6 +16,7 @@ from embeddings import EmbeddingsGenerator
 from vector_search import VectorIndex, SearchEngine
 from chunks_db import ChunksDB
 from kiro_client import KiroSessionManager, format_books_context
+from conversations_db import ConversationsDB
 
 # Configuration
 CALIBRE_LIBRARY = Path.home() / "Calibre Library"
@@ -45,6 +46,7 @@ embeddings_gen = None
 vector_index = None
 search_engine = None
 session_manager = None
+conversations_db = None
 
 
 # Pydantic models
@@ -117,7 +119,7 @@ class SessionHistoryResponse(BaseModel):
 @app.on_event("startup")
 async def startup_event():
     """Initialize components on startup"""
-    global calibre_db, chunks_db, embeddings_gen, vector_index, search_engine, session_manager
+    global calibre_db, chunks_db, embeddings_gen, vector_index, search_engine, session_manager, conversations_db
     
     print("🚀 Starting Calibre Intelligent Library API...")
     
@@ -128,6 +130,10 @@ async def startup_event():
     # Initialize chunks DB
     chunks_db = ChunksDB(DATA_DIR / "chunks.db")
     print(f"✓ Chunks database ready")
+    
+    # Initialize conversations DB
+    conversations_db = ConversationsDB(DATA_DIR / "conversations.db")
+    print(f"✓ Conversations database ready")
     
     # Initialize embeddings generator
     embeddings_gen = EmbeddingsGenerator()
@@ -151,8 +157,8 @@ async def startup_event():
     search_engine = SearchEngine(embeddings_gen, vector_index)
     print(f"✓ Search engine ready")
     
-    # Initialize session manager
-    session_manager = KiroSessionManager()
+    # Initialize session manager with conversations DB
+    session_manager = KiroSessionManager(conversations_db=conversations_db)
     print(f"✓ Session manager ready")
     
     print("✅ API ready!")
@@ -419,6 +425,84 @@ async def list_sessions():
         "total": len(sessions),
         "sessions": sessions
     }
+
+
+@app.get("/conversations", tags=["Conversation"])
+async def list_conversations(limit: int = 50, offset: int = 0):
+    """List all persisted conversations"""
+    conversations = conversations_db.get_all_conversations(limit, offset)
+    
+    return {
+        "total": len(conversations),
+        "limit": limit,
+        "offset": offset,
+        "conversations": [
+            {
+                "session_id": c.session_id,
+                "created_at": c.created_at,
+                "last_activity": c.last_activity,
+                "has_context": c.context is not None
+            }
+            for c in conversations
+        ]
+    }
+
+
+@app.get("/conversation/{session_id}/export", tags=["Conversation"])
+async def export_conversation(session_id: str):
+    """Export a conversation with all messages"""
+    export = conversations_db.export_conversation(session_id)
+    
+    if not export:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    
+    return export
+
+
+@app.delete("/conversation/{session_id}", tags=["Conversation"])
+async def delete_persisted_conversation(session_id: str):
+    """Delete a persisted conversation permanently"""
+    if conversations_db.delete_conversation(session_id):
+        # Also delete from active sessions if present
+        session_manager.delete_session(session_id)
+        return {"status": "deleted", "session_id": session_id}
+    else:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+
+
+@app.delete("/conversation/{session_id}/messages", tags=["Conversation"])
+async def clear_conversation_messages(session_id: str):
+    """Clear all messages from a conversation (keep session)"""
+    count = conversations_db.clear_conversation_messages(session_id)
+    
+    # Also clear from active session if present
+    session = session_manager.get_session(session_id)
+    if session:
+        session.clear_history()
+    
+    return {
+        "status": "cleared",
+        "session_id": session_id,
+        "messages_deleted": count
+    }
+
+
+@app.get("/conversations/search", tags=["Conversation"])
+async def search_conversations(query: str, limit: int = 20):
+    """Search conversations by content"""
+    results = conversations_db.search_conversations(query, limit)
+    
+    return {
+        "query": query,
+        "total": len(results),
+        "results": results
+    }
+
+
+@app.get("/conversations/stats", tags=["Conversation"])
+async def get_conversations_stats():
+    """Get conversation statistics"""
+    return conversations_db.get_stats()
 
 
 if __name__ == "__main__":

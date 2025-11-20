@@ -98,33 +98,51 @@ class KiroClient:
 class KiroSession:
     """Manages a persistent conversation session with Kiro"""
     
-    def __init__(self, session_id: Optional[str] = None, kiro_client: Optional[KiroClient] = None):
+    def __init__(self, session_id: Optional[str] = None, kiro_client: Optional[KiroClient] = None, 
+                 conversations_db=None):
         """
         Initialize Kiro session
         
         Args:
             session_id: Optional session ID (generates new if not provided)
             kiro_client: Optional KiroClient instance
+            conversations_db: Optional ConversationsDB instance for persistence
         """
         self.session_id = session_id or str(uuid.uuid4())
         self.client = kiro_client or KiroClient()
+        self.conversations_db = conversations_db
         self.context = None
         self.history = []
         self.created_at = time.time()
         self.last_activity = time.time()
+        
+        # Save to database if available
+        if self.conversations_db:
+            try:
+                self.conversations_db.add_conversation(self.session_id)
+            except:
+                pass  # Conversation might already exist
     
     def set_context(self, context: str):
         """Set context for the session"""
         self.context = context
         self.last_activity = time.time()
+        
+        # Persist to database
+        if self.conversations_db:
+            try:
+                self.conversations_db.update_conversation_context(self.session_id, context)
+            except:
+                pass
     
-    def ask(self, question: str, additional_context: Optional[str] = None) -> str:
+    def ask(self, question: str, additional_context: Optional[str] = None, context_books: Optional[List[int]] = None) -> str:
         """
         Ask a question in this session
         
         Args:
             question: Question to ask
             additional_context: Optional additional context for this specific question
+            context_books: Optional list of book IDs for context
             
         Returns:
             Kiro's response
@@ -138,14 +156,45 @@ class KiroSession:
         response = self.client.ask(question, full_context)
         
         # Update history
-        self.history.append({
+        history_entry = {
             "timestamp": time.time(),
             "question": question,
             "response": response,
             "context": additional_context
-        })
+        }
+        self.history.append(history_entry)
         
         self.last_activity = time.time()
+        
+        # Persist to database
+        if self.conversations_db:
+            try:
+                import json
+                from conversations_db import MessageRecord
+                
+                # Save user message
+                user_msg = MessageRecord(
+                    id=None,
+                    session_id=self.session_id,
+                    timestamp=None,
+                    role="user",
+                    content=question,
+                    context_books=json.dumps(context_books) if context_books else None
+                )
+                self.conversations_db.add_message(user_msg)
+                
+                # Save assistant response
+                assistant_msg = MessageRecord(
+                    id=None,
+                    session_id=self.session_id,
+                    timestamp=None,
+                    role="assistant",
+                    content=response,
+                    context_books=None
+                )
+                self.conversations_db.add_message(assistant_msg)
+            except Exception as e:
+                print(f"Warning: Could not persist messages: {e}")
         
         return response
     
@@ -171,14 +220,16 @@ class KiroSession:
 class KiroSessionManager:
     """Manages multiple Kiro sessions"""
     
-    def __init__(self, kiro_client: Optional[KiroClient] = None):
+    def __init__(self, kiro_client: Optional[KiroClient] = None, conversations_db=None):
         """
         Initialize session manager
         
         Args:
             kiro_client: Optional shared KiroClient instance
+            conversations_db: Optional ConversationsDB instance for persistence
         """
         self.client = kiro_client or KiroClient()
+        self.conversations_db = conversations_db
         self.sessions = {}
         self.max_inactive_time = 3600  # 1 hour
     
@@ -192,7 +243,7 @@ class KiroSessionManager:
         Returns:
             New KiroSession
         """
-        session = KiroSession(session_id, self.client)
+        session = KiroSession(session_id, self.client, self.conversations_db)
         self.sessions[session.session_id] = session
         print(f"✓ Created session: {session.session_id}")
         return session
@@ -204,6 +255,13 @@ class KiroSessionManager:
     def delete_session(self, session_id: str) -> bool:
         """Delete a session"""
         if session_id in self.sessions:
+            # Delete from database
+            if self.conversations_db:
+                try:
+                    self.conversations_db.delete_conversation(session_id)
+                except:
+                    pass
+            
             del self.sessions[session_id]
             print(f"✓ Deleted session: {session_id}")
             return True
