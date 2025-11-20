@@ -1,0 +1,371 @@
+# Plan de Trabajo - Calibre Intelligent Library
+
+## 📋 Contexto del Proyecto
+
+### Problema a Resolver
+Calibre solo permite búsquedas básicas por título y autor. Con una biblioteca de 80,000+ libros, es difícil encontrar contenido relevante por temas, conceptos o necesidades de investigación específicas.
+
+### Solución Propuesta
+Sistema de búsqueda semántica integrado en Calibre que:
+1. Indexa libros usando embeddings (vectores semánticos)
+2. Permite búsquedas por conceptos y temas
+3. Busca dentro de capítulos específicos
+4. Integra asistente conversacional (Kiro CLI) para análisis y recomendaciones
+5. Es completamente portable entre computadoras
+
+### Especificaciones Técnicas
+- **Biblioteca**: 80,379 libros (principalmente EPUB)
+- **Resúmenes disponibles**: 67,311 libros
+- **Categorías**: 76 tags
+- **Hardware**: MacBook Pro 2018, i9 6-core, 16GB RAM
+- **Tiempo de indexación inicial**: 12-14 horas
+- **Tiempo de búsqueda**: <1 segundo
+
+---
+
+## 🎯 Fases del Proyecto
+
+### Fase 1: Backend - Sistema de Búsqueda Vectorial ⏳
+**Objetivo**: Crear el motor de búsqueda semántica
+
+#### Tareas:
+- [ ] **1.1 Setup del proyecto backend**
+  - [ ] Crear estructura de carpetas
+  - [ ] Configurar entorno virtual Python
+  - [ ] Instalar dependencias (FastAPI, sentence-transformers, FAISS, etc.)
+  - [ ] Crear requirements.txt
+  - **Tiempo estimado**: 1 hora
+
+- [ ] **1.2 Conexión con Calibre DB**
+  - [ ] Crear módulo para leer metadata.db
+  - [ ] Extraer libros, autores, tags, resúmenes
+  - [ ] Crear modelo de datos interno
+  - **Tiempo estimado**: 2-3 horas
+
+- [ ] **1.3 Extracción de contenido EPUB**
+  - [ ] Implementar extractor de tabla de contenidos (TOC)
+  - [ ] Implementar extractor de texto completo por capítulo
+  - [ ] Crear sistema de chunks (fragmentos de texto)
+  - [ ] Manejo de errores para EPUBs corruptos
+  - **Tiempo estimado**: 4-6 horas
+
+- [ ] **1.4 Generación de embeddings**
+  - [ ] Configurar modelo Sentence Transformers
+  - [ ] Crear pipeline de procesamiento
+  - [ ] Implementar sistema de progreso y reanudación
+  - [ ] Generar embeddings para resúmenes + TOCs + chunks
+  - **Tiempo estimado**: 2-3 horas de código + 12-14 horas de procesamiento
+
+- [ ] **1.5 Índice vectorial FAISS**
+  - [ ] Crear índice FAISS
+  - [ ] Implementar búsqueda por similitud
+  - [ ] Optimizar para 500k-1M vectores
+  - [ ] Sistema de guardado/carga del índice
+  - **Tiempo estimado**: 3-4 horas
+
+- [ ] **1.6 Base de datos de chunks**
+  - [ ] Diseñar schema SQLite (books, chapters, chunks, conversations)
+  - [ ] Implementar CRUD operations
+  - [ ] Crear índices para búsquedas rápidas
+  - **Tiempo estimado**: 2-3 horas
+
+- [ ] **1.7 API REST con FastAPI**
+  - [ ] Endpoint: POST /search (búsqueda semántica)
+  - [ ] Endpoint: GET /book/{id} (detalles de libro)
+  - [ ] Endpoint: GET /book/{id}/toc (tabla de contenidos)
+  - [ ] Endpoint: GET /chapter/{id} (contenido de capítulo)
+  - [ ] Endpoint: GET /health (health check)
+  - **Tiempo estimado**: 3-4 horas
+
+**Total Fase 1**: ~20-25 horas de desarrollo + 12-14 horas de indexación
+
+---
+
+### Fase 2: Integración con Kiro CLI ⏳
+**Objetivo**: Sistema conversacional para análisis de resultados
+
+#### Tareas:
+- [ ] **2.1 Cliente Kiro**
+  - [ ] Implementar KiroClient con subprocess
+  - [ ] Manejo de sesiones persistentes
+  - [ ] Sistema de reintentos y error handling
+  - **Tiempo estimado**: 2-3 horas
+
+- [ ] **2.2 API de conversación**
+  - [ ] Endpoint: POST /session/new (crear sesión)
+  - [ ] Endpoint: POST /ask/{session_id} (preguntar)
+  - [ ] Endpoint: DELETE /session/{session_id} (cerrar sesión)
+  - [ ] Sistema de contexto (pasar resultados de búsqueda a Kiro)
+  - **Tiempo estimado**: 3-4 horas
+
+- [ ] **2.3 Gestión de contexto**
+  - [ ] Formatear resultados de búsqueda para Kiro
+  - [ ] Incluir metadata relevante (autor, fecha, resumen, capítulos)
+  - [ ] Limitar contexto para no exceder tokens
+  - **Tiempo estimado**: 2 horas
+
+- [ ] **2.4 Persistencia de conversaciones**
+  - [ ] Guardar historial en conversations.db
+  - [ ] Recuperar conversaciones anteriores
+  - [ ] Exportar conversaciones
+  - **Tiempo estimado**: 2-3 horas
+
+**Total Fase 2**: ~10-12 horas
+
+---
+
+### Fase 3: Plugin de Calibre ⏳
+**Objetivo**: Interfaz gráfica integrada en Calibre
+
+#### Tareas:
+- [ ] **3.1 Setup del plugin**
+  - [ ] Crear estructura básica del plugin
+  - [ ] Configurar metadata del plugin
+  - [ ] Implementar InterfaceActionBase
+  - **Tiempo estimado**: 2 horas
+
+- [ ] **3.2 Botón en toolbar**
+  - [ ] Agregar botón "Búsqueda Inteligente"
+  - [ ] Diseñar icono
+  - [ ] Conectar con diálogo de búsqueda
+  - **Tiempo estimado**: 1-2 horas
+
+- [ ] **3.3 Diálogo de búsqueda**
+  - [ ] Crear ventana con PyQt5
+  - [ ] Input de búsqueda
+  - [ ] Tabla de resultados (similar a Calibre)
+  - [ ] Botones de acción (ver detalles, abrir libro)
+  - **Tiempo estimado**: 4-6 horas
+
+- [ ] **3.4 Panel de chat lateral**
+  - [ ] Crear widget de chat
+  - [ ] Historial de mensajes
+  - [ ] Input para preguntas
+  - [ ] Integración con API de conversación
+  - **Tiempo estimado**: 4-5 horas
+
+- [ ] **3.5 Comunicación con backend**
+  - [ ] Cliente HTTP para API
+  - [ ] Verificar que backend esté corriendo
+  - [ ] Auto-iniciar backend si no está activo
+  - [ ] Manejo de errores de conexión
+  - **Tiempo estimado**: 3-4 horas
+
+- [ ] **3.6 Configuración del plugin**
+  - [ ] Ventana de configuración
+  - [ ] Ruta a Calibre Library
+  - [ ] Puerto del backend
+  - [ ] Opciones de búsqueda
+  - **Tiempo estimado**: 2-3 horas
+
+- [ ] **3.7 Proceso de indexación**
+  - [ ] Botón "Indexar biblioteca"
+  - [ ] Barra de progreso
+  - [ ] Permitir cancelación
+  - [ ] Notificación al completar
+  - **Tiempo estimado**: 3-4 horas
+
+**Total Fase 3**: ~20-26 horas
+
+---
+
+### Fase 4: Sistema de Instalación y Portabilidad ⏳
+**Objetivo**: Hacer el sistema fácil de instalar y migrar
+
+#### Tareas:
+- [ ] **4.1 Instalador inteligente**
+  - [ ] Detectar instalación existente
+  - [ ] Detectar Calibre Library
+  - [ ] Ofrecer restaurar desde backup
+  - [ ] Verificar y actualizar rutas
+  - **Tiempo estimado**: 3-4 horas
+
+- [ ] **4.2 Sistema de backup**
+  - [ ] Crear backup comprimido (.tar.gz)
+  - [ ] Incluir embeddings, chunks.db, conversations.db
+  - [ ] Excluir libros (ya están en Calibre)
+  - [ ] Restaurar desde backup
+  - **Tiempo estimado**: 2-3 horas
+
+- [ ] **4.3 Estructura portable**
+  - [ ] Guardar todo en .biblioteca_inteligente/
+  - [ ] Rutas relativas en config.json
+  - [ ] Verificación de integridad
+  - **Tiempo estimado**: 2 horas
+
+- [ ] **4.4 Empaquetado del plugin**
+  - [ ] Crear .zip del plugin
+  - [ ] Incluir backend en el paquete
+  - [ ] Script de instalación de dependencias
+  - [ ] README de instalación
+  - **Tiempo estimado**: 2-3 horas
+
+**Total Fase 4**: ~10-12 horas
+
+---
+
+### Fase 5: Testing y Optimización ⏳
+**Objetivo**: Asegurar calidad y rendimiento
+
+#### Tareas:
+- [ ] **5.1 Tests unitarios**
+  - [ ] Tests de extracción EPUB
+  - [ ] Tests de búsqueda vectorial
+  - [ ] Tests de API
+  - [ ] Tests de Kiro client
+  - **Tiempo estimado**: 6-8 horas
+
+- [ ] **5.2 Tests de integración**
+  - [ ] Test completo: búsqueda → resultados → chat
+  - [ ] Test de migración/backup
+  - [ ] Test de instalación limpia
+  - **Tiempo estimado**: 4-5 horas
+
+- [ ] **5.3 Optimización de rendimiento**
+  - [ ] Profiling de búsquedas
+  - [ ] Optimizar carga de embeddings
+  - [ ] Cache de resultados frecuentes
+  - **Tiempo estimado**: 3-4 horas
+
+- [ ] **5.4 Manejo de errores**
+  - [ ] Logs detallados
+  - [ ] Mensajes de error amigables
+  - [ ] Recovery automático
+  - **Tiempo estimado**: 2-3 horas
+
+**Total Fase 5**: ~15-20 horas
+
+---
+
+### Fase 6: Documentación y Pulido ⏳
+**Objetivo**: Documentar y preparar para uso
+
+#### Tareas:
+- [ ] **6.1 Documentación técnica**
+  - [ ] Arquitectura detallada
+  - [ ] API reference
+  - [ ] Guía de desarrollo
+  - **Tiempo estimado**: 4-5 horas
+
+- [ ] **6.2 Documentación de usuario**
+  - [ ] Guía de instalación paso a paso
+  - [ ] Tutorial de uso
+  - [ ] FAQ
+  - [ ] Troubleshooting
+  - **Tiempo estimado**: 3-4 horas
+
+- [ ] **6.3 UI/UX polish**
+  - [ ] Mejorar diseño visual
+  - [ ] Tooltips y ayuda contextual
+  - [ ] Atajos de teclado
+  - **Tiempo estimado**: 3-4 horas
+
+- [ ] **6.4 Video demo**
+  - [ ] Grabar demo de funcionalidades
+  - [ ] Tutorial en video
+  - **Tiempo estimado**: 2-3 horas
+
+**Total Fase 6**: ~12-16 horas
+
+---
+
+## 📊 Resumen de Tiempos
+
+| Fase | Descripción | Tiempo Estimado |
+|------|-------------|-----------------|
+| 1 | Backend - Búsqueda Vectorial | 20-25 horas + 12-14h indexación |
+| 2 | Integración Kiro CLI | 10-12 horas |
+| 3 | Plugin de Calibre | 20-26 horas |
+| 4 | Instalación y Portabilidad | 10-12 horas |
+| 5 | Testing y Optimización | 15-20 horas |
+| 6 | Documentación y Pulido | 12-16 horas |
+| **TOTAL** | **~90-115 horas de desarrollo** |
+
+**Estimación realista**: 2-3 meses trabajando 1-2 horas diarias
+
+---
+
+## 🗓️ Cronograma Sugerido
+
+### Semana 1-2: Backend Core
+- Días 1-3: Setup + Conexión Calibre DB
+- Días 4-7: Extracción EPUB y TOC
+- Días 8-10: Embeddings y FAISS
+- Días 11-14: API REST
+
+### Semana 3: Kiro Integration
+- Días 15-17: Cliente Kiro
+- Días 18-21: API conversación + persistencia
+
+### Semana 4-5: Plugin Calibre
+- Días 22-25: Setup plugin + toolbar
+- Días 26-30: Diálogo búsqueda
+- Días 31-35: Panel chat + comunicación backend
+
+### Semana 6: Instalación
+- Días 36-39: Instalador + backup
+- Días 40-42: Empaquetado
+
+### Semana 7-8: Testing
+- Días 43-49: Tests unitarios e integración
+- Días 50-56: Optimización
+
+### Semana 9-10: Documentación
+- Días 57-63: Docs técnica y usuario
+- Días 64-70: Polish + demo
+
+---
+
+## 🎯 Hitos Importantes
+
+- [ ] **Hito 1**: Backend funcional con búsqueda básica
+- [ ] **Hito 2**: Indexación completa de biblioteca (12-14 horas)
+- [ ] **Hito 3**: Integración Kiro funcionando
+- [ ] **Hito 4**: Plugin instalable en Calibre
+- [ ] **Hito 5**: Sistema completo end-to-end
+- [ ] **Hito 6**: Documentación completa
+
+---
+
+## 📝 Notas de Desarrollo
+
+### Decisiones Técnicas
+- **Modelo de embeddings**: all-MiniLM-L6-v2 (balance velocidad/calidad)
+- **Vector DB**: FAISS (mejor rendimiento local)
+- **Backend**: FastAPI (async, rápido, fácil)
+- **Plugin**: PyQt5 (API de Calibre)
+- **Persistencia**: SQLite (portable, sin servidor)
+
+### Consideraciones
+- Proceso de indexación es reanudable
+- Sistema funciona offline (sin APIs externas)
+- Compatible con suscripción Q Developer Pro existente
+- Portable entre computadoras (solo copiar carpeta)
+
+### Próximos Pasos
+1. Comenzar con Fase 1: Backend
+2. Crear entorno virtual y instalar dependencias
+3. Implementar conexión con Calibre DB
+4. Probar extracción de un libro de ejemplo
+
+---
+
+## 🔄 Actualizaciones
+
+**2025-11-19**: Plan inicial creado
+- Definida arquitectura híbrida (plugin + backend)
+- Estimados de tiempo por fase
+- Cronograma de 10 semanas
+
+---
+
+## 💡 Ideas Futuras (Post-MVP)
+
+- [ ] Soporte para PDF (extracción de texto)
+- [ ] Anotaciones y highlights sincronizados
+- [ ] Recomendaciones automáticas basadas en lectura
+- [ ] Integración con Goodreads/OpenLibrary
+- [ ] Modo "investigación" con notas y referencias
+- [ ] Exportar bibliografía en formato académico
+- [ ] Compartir colecciones con otros usuarios
+- [ ] App móvil para consultas
