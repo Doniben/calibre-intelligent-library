@@ -168,12 +168,22 @@ Sistema de búsqueda semántica integrado en Calibre que:
     - ✓ Timeout y error handling implementados
     - ✓ Cleanup de sesiones inactivas
 
-- [ ] **2.2 API de conversación**
-  - [ ] Endpoint: POST /session/new (crear sesión)
-  - [ ] Endpoint: POST /ask/{session_id} (preguntar)
-  - [ ] Endpoint: DELETE /session/{session_id} (cerrar sesión)
-  - [ ] Sistema de contexto (pasar resultados de búsqueda a Kiro)
-  - **Tiempo estimado**: 3-4 horas
+- [x] **2.2 API de conversación** ✅
+  - [x] Endpoint: POST /session/new (crear sesión)
+  - [x] Endpoint: POST /session/{id}/ask (preguntar)
+  - [x] Endpoint: GET /session/{id}/history (historial)
+  - [x] Endpoint: DELETE /session/{id} (cerrar sesión)
+  - [x] Endpoint: GET /sessions (listar sesiones)
+  - [x] Sistema de contexto (pasar libros a Kiro)
+  - **Tiempo real**: 1.5 horas
+  - **Tests**: ✅ Estructura validada (8 tests creados)
+  - **Validación**:
+    - ✓ 5 nuevos endpoints de conversación
+    - ✓ SessionManager integrado en servidor
+    - ✓ Context building desde book IDs
+    - ✓ Error handling (404, 500)
+    - ✓ Pydantic models para requests/responses
+    - ✓ Session lifecycle completo
 
 ---
 
